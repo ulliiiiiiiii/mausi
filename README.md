@@ -52,6 +52,12 @@ build.cmd
 Das baut `Mausi.exe` aus `src\mausi.cs` (eine Datei, C# 5, .NET Framework 4.x, WinForms).
 GitHub baut bei jedem Push mit; ein Tag wie `v1.0.0` legt automatisch ein Release mit der fertigen `Mausi.exe` an.
 
+Neue Version veröffentlichen: Versionsnummer oben in `src/mausi.cs` anpassen, committen und taggen:
+
+```bash
+git tag v1.1.0 && git push origin main v1.1.0
+```
+
 ## Zeiger-Pakete und Marken
 
 Die Pakete gehören nicht zu Mausi und werden nicht mitgeliefert. Mausi lädt sie aus den Releases ihrer Projekte; sie stehen unter **GPL-3.0** und stammen von [ful1e5](https://github.com/ful1e5):
