@@ -2507,16 +2507,26 @@ public class MausChangerForm : Form
 
     // ---------------- Gratis-Zeiger: beim ersten Start selbst laden ----------------
 
+    // Name, Pfad im GitHub-Release, SHA-256 der Zip-Datei. Release-Dateien lassen sich nachträglich
+    // austauschen; eine Datei mit anderer Prüfsumme wird deshalb verworfen, nicht entpackt.
     static readonly string[,] FreePacks =
     {
-        { "GoogleDot Blau", "ful1e5/Google_Cursor/releases/download/v2.0.0/GoogleDot-Blue-Windows.zip" },
-        { "Bibata Classic", "ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Classic-Windows.zip" },
-        { "Bibata Ice", "ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Ice-Windows.zip" },
-        { "Banana", "ful1e5/banana-cursor/releases/download/v2.0.0/Banana-Windows.zip" },
-        { "Fuchsia Pop", "ful1e5/fuchsia-cursor/releases/download/v2.0.1/Fuchsia-Pop-Windows.zip" },
-        { "Bibata Amber", "ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Amber-Windows.zip" },
-        { "Pokémon", "ful1e5/pokemon-cursor/releases/download/v2.0.0/Pokemon-Windows.zip" },
-        { "macOS", "ful1e5/apple_cursor/releases/download/v2.0.1/macOS-Windows.zip" }
+        { "GoogleDot Blau", "ful1e5/Google_Cursor/releases/download/v2.0.0/GoogleDot-Blue-Windows.zip",
+          "0fbecb1659e2c01ff6f5028aff29b0696e2b01b39a81f084f7e713b92443baf3" },
+        { "Bibata Classic", "ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Classic-Windows.zip",
+          "b98eca4077d6e7796ff7e710e4d220ca13439f1118160d1e7b3db9e91fdec2be" },
+        { "Bibata Ice", "ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Ice-Windows.zip",
+          "0045e40324da5b540b3bee260f53d0792df62be9cdef91655a024ae9f151bd04" },
+        { "Banana", "ful1e5/banana-cursor/releases/download/v2.0.0/Banana-Windows.zip",
+          "854c66d43ae6783ebad9c240f1dee187791d05a5920248acdd642c864159f2f9" },
+        { "Fuchsia Pop", "ful1e5/fuchsia-cursor/releases/download/v2.0.1/Fuchsia-Pop-Windows.zip",
+          "7b1064c600f1fa7a843ef1348f8f0b9eb60ce4bd4926d9a604812a54a7b3a052" },
+        { "Bibata Amber", "ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Amber-Windows.zip",
+          "5151e0f8648d00fb734fea501def12b5cc1fbc65ba12a6e28db2e1295ebf8961" },
+        { "Pokémon", "ful1e5/pokemon-cursor/releases/download/v2.0.0/Pokemon-Windows.zip",
+          "5767fe9c4f48eb436aeb5b65b1086bc3c2427c4ef1c6f27ee136bea537613013" },
+        { "macOS", "ful1e5/apple_cursor/releases/download/v2.0.1/macOS-Windows.zip",
+          "64a2c74780908954a2ec497f67919709280ebb8ebdf3e3b9336bac071589c9de" }
     };
 
     protected override void OnShown(EventArgs e)
@@ -2560,7 +2570,7 @@ public class MausChangerForm : Form
                 n++;
                 string msg = string.Format("Lade Gratis-Zeiger {0}/{1}: {2} …", n, todo.Count, name);
                 Post(delegate { Status(msg, Ui.Muted); });
-                string dir = DownloadPack(name, "https://github.com/" + FreePacks[i, 1]);
+                string dir = DownloadPack(name, "https://github.com/" + FreePacks[i, 1], FreePacks[i, 2]);
                 if (dir == null) continue;
                 ok++;
                 done.Add(name);
@@ -2577,8 +2587,19 @@ public class MausChangerForm : Form
         worker.Start();
     }
 
-    // Zip laden, mit Windows-tar entpacken, Ordner "Regular" nach cursors\<Name> kopieren
-    string DownloadPack(string name, string url)
+    static string Sha256Hex(string path)
+    {
+        using (var sha = System.Security.Cryptography.SHA256.Create())
+        using (FileStream fs = File.OpenRead(path))
+        {
+            var sb = new StringBuilder(64);
+            foreach (byte b in sha.ComputeHash(fs)) sb.Append(b.ToString("x2"));
+            return sb.ToString();
+        }
+    }
+
+    // Zip laden, Prüfsumme vergleichen, mit Windows-tar entpacken, Ordner "Regular" nach cursors\<Name> kopieren
+    string DownloadPack(string name, string url, string sha256)
     {
         string tmp = Path.Combine(Path.GetTempPath(), "mausi-" + Guid.NewGuid().ToString("N"));
         try
@@ -2590,6 +2611,7 @@ public class MausChangerForm : Form
                 wc.Headers.Add("User-Agent", "Mausi");
                 wc.DownloadFile(url, zip);
             }
+            if (!string.Equals(Sha256Hex(zip), sha256, StringComparison.OrdinalIgnoreCase)) return null;
             string x = Path.Combine(tmp, "x");
             Directory.CreateDirectory(x);
             var psi = new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "tar.exe"),

@@ -39,7 +39,7 @@ Mausi ändert nur Einstellungen deines eigenen Benutzerkontos:
 **Turbo:** Mausi vergrößert dafür über einen Maus-Hook (`WH_MOUSE_LL`) jede Mausbewegung. Das wirkt nur, solange Mausi läuft – deshalb bleibt Mausi bei aktivem Turbo im Infobereich und startet mit Windows. Ist der Zeiger ausgeblendet (wie in den meisten Spielen), lässt der Turbo alles unverändert. Ist der Turbo aus, ist kein Hook aktiv.
 Manche Virenscanner werden bei Maus-Hooks und Autostart misstrauisch; der Quellcode liegt deshalb vollständig offen.
 
-**Netzwerk:** nur beim ersten Start, um die freien Pakete aus ihren GitHub-Releases zu laden.
+**Netzwerk:** nur beim ersten Start, um die freien Pakete aus ihren GitHub-Releases zu laden. Jede Zip-Datei wird gegen eine fest eingetragene SHA-256-Prüfsumme geprüft; passt sie nicht, verwirft Mausi das Paket.
 
 ## Selbst bauen
 
