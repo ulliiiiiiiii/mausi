@@ -1,0 +1,9 @@
+# Bauergebnisse
+*.exe
+*.pdb
+
+# legt Mausi zur Laufzeit neben der .exe an
+cursors/
+
+# Screenshots aus der Vorschau-Emulation
+shots/
